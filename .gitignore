@@ -1,0 +1,19 @@
+# Build directories
+build/
+*/build/
+out/
+bin/
+obj/
+target/
+dist/
+
+
+.vs/
+
+
+
+# Environment variables
+.env
+*.env
+.env.*
+!.env.examp
