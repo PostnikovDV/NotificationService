@@ -19,7 +19,7 @@ net::awaitable<void> do_listen(
 	{
 		auto socket = co_await acceptor.async_accept();
 
-		std::cout << "🔗 New client connected" << std::endl;
+		std::cout << "New client connected" << std::endl;
 
 		net::co_spawn(
 			executor,
