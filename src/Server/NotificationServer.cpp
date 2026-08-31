@@ -17,16 +17,18 @@ net::awaitable<void> do_listen(
 
 	for (;;)
 	{
-		auto socket = co_await acceptor.async_accept();
-
+		auto socket = co_await acceptor.async_accept(executor);
 		std::cout << "New client connected" << std::endl;
 
+		auto strand = net::make_strand(executor);
+
+		beast::tcp_stream tcp_stream(std::move(socket));
+
+		websocket::stream<beast::tcp_stream> ws_stream(std::move(tcp_stream));
+
 		net::co_spawn(
-			executor,
-			do_session(
-				websocket::stream<beast::tcp_stream>(std::move(socket)),
-				session_manager
-			),
+			strand,
+			do_session(std::move(ws_stream), session_manager, strand),
 			[](std::exception_ptr e)
 			{
 				if (e)
@@ -47,7 +49,8 @@ net::awaitable<void> do_listen(
 
 net::awaitable<void> do_session(
 	websocket::stream<beast::tcp_stream> stream,
-	std::shared_ptr<SessionManager> session_manager
+	std::shared_ptr<SessionManager> session_manager,
+	net::strand<net::any_io_executor> strand
 )
 {
 	try
@@ -99,7 +102,7 @@ net::awaitable<void> do_session(
 
 
 		auto session_wrapper = std::make_shared<WebSocketSessionImpl>(
-			stream, session_id
+			stream, session_id, strand
 		);
 		session_manager->AddSession(session_id, session_wrapper);
 

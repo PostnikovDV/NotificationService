@@ -11,5 +11,6 @@ net::awaitable<void> do_listen(
 
 net::awaitable<void> do_session(
 	websocket::stream<beast::tcp_stream> stream,
-	std::shared_ptr<SessionManager> session_manager
+	std::shared_ptr<SessionManager> session_manager,
+	net::strand<net::any_io_executor> strand
 );

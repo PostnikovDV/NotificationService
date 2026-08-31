@@ -44,30 +44,32 @@ int main(int argc, char* argv[])
 		);
 
 		std::string kafka_brokers = "localhost:9092";
-		std::thread kafka_thread([&ioc, session_manager, kafka_brokers]()
-			{
+		std::thread kafka_thread([&ioc, session_manager, kafka_brokers]() {
 			KafkaConsumer consumer(kafka_brokers, "notification-group");
 			consumer.Subscribe("order_notifications");
 			consumer.Subscribe("payment_notifications");
-			consumer.SetCallback([session_manager](const std::string& topic,
+
+			consumer.SetCallback([&ioc, session_manager](const std::string& topic,
 				const std::string& message) {
-					try {
-						auto json = nlohmann::json::parse(message);
-						if (json.contains("session_id")) {
-							std::string session_id = json["session_id"].get<std::string>();
-							session_manager->SendToSession(session_id, message);
+					net::post(ioc, [session_manager, message]() {
+						try {
+							auto json = nlohmann::json::parse(message);
+							if (json.contains("session_id")) {
+								std::string session_id = json["session_id"].get<std::string>();
+								session_manager->SendToSession(session_id, message);
+							}
+							else {
+								session_manager->Broadcast(message);
+							}
 						}
-						else {
-							session_manager->Broadcast(message);
+						catch (const std::exception& e) {
+							std::cerr << "Kafka message error: " << e.what() << std::endl;
 						}
-					}
-					catch (const std::exception& e) {
-						std::cerr << "Kafka message error: " << e.what() << std::endl;
-					}
+						});
 				});
+
 			consumer.Run();
-			}
-		);
+			});
 		kafka_thread.detach();
 
 		std::vector<std::thread> thread_pool;

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+﻿cmake_minimum_required(VERSION 3.15)
 project(NotificationService)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -46,12 +46,12 @@ source_group("Session" FILES
 )
 
 source_group("Server" FILES 
-   src/Server/NotificationServer.cpp
+    src/Server/NotificationServer.cpp
     src/Server/NotificationServer.h
 )
 
 source_group("Kafka" FILES 
-  src/Kafka/KafkaConsumer.cpp
+    src/Kafka/KafkaConsumer.cpp
     src/Kafka/KafkaConsumer.h
 )
 
