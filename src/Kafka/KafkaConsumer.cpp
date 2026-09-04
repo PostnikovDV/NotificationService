@@ -30,7 +30,8 @@ bool KafkaConsumer::Subscribe(const std::vector<std::string>& topics)
 	topics_ = topics;
 	consumer_->subscribe(topics_);
 	std::cout << "Subscribed to topics: ";
-	for (const auto& t : topics_) {
+	for (const auto& t : topics_)
+	{
 		std::cout << t << " ";
 	}
 	std::cout << std::endl;
@@ -46,18 +47,22 @@ void KafkaConsumer::Run()
 {
 	running_ = true;
 
-	while (running_) {
+	while (running_)
+	{
 		auto msg = consumer_->consume(1000);
 
-		if (msg->err() == RdKafka::ERR_NO_ERROR) {
+		if (msg->err() == RdKafka::ERR_NO_ERROR)
+		{
 			std::string message((const char*)msg->payload(), msg->len());
 			std::string topic = msg->topic_name();
 
-			if (callback_) {
+			if (callback_)
+			{
 				callback_(topic, message);
 			}
 		}
-		else if (msg->err() != RdKafka::ERR__TIMED_OUT) {
+		else if (msg->err() != RdKafka::ERR__TIMED_OUT)
+		{
 			std::cerr << "Kafka error: " << msg->errstr() << std::endl;
 		}
 
@@ -68,7 +73,8 @@ void KafkaConsumer::Run()
 void KafkaConsumer::Stop()
 {
 	running_ = false;
-	if (consumer_) {
+	if (consumer_)
+	{
 		consumer_->close();
 	}
 }
